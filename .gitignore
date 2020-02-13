@@ -1,0 +1,5 @@
+dist-newstyle/
+
+cabal.project
+cabal.project.local
+stack.yaml

@@ -1,0 +1,88 @@
+cabal-version:  3.0
+name:           acts
+version:        0.1.0.0
+synopsis:       Semigroup actions, groups, and torsors.
+category:       Algebra, Math
+license:        BSD-3-Clause
+build-type:     Simple
+author:         Sam Derbyshire
+maintainer:     Sam Derbyshire
+extra-doc-files:
+  img/*.svg
+description:
+  Acts and torsors model types which can be transformed under the action of another type.
+
+  A prototypical example is affine space, which has an action by translation:
+  given any two points in affine space, there is a unique translation that brings one to the other.
+
+  This can be useful in a library keeping track of time: on top of needing to keep track
+  of units, one also needs to distinguish between absolute time (time stamps) and relative time
+  (time differences).
+  The operations one expects in this situation are:
+
+  * Addition and subtraction of time differences: time differences form a (commutative) group.
+  * Translation of an absolute time by a time difference: there is an action of relative time on absolute time.
+  * Given two absolute times, one can obtain the time difference between them: absolute time is a torsor under relative time.
+
+  This library provides a convenient framework which helps to avoid mixing up these two different notions.
+
+
+  A fully fleshed out example is available at "Acts.Examples.MusicalIntervals",
+  which showcases the use of actions and torsors in the context of musical intervals and harmony.
+  It also demonstrates common usage patterns of this library, such as how to automatically derive instances.
+
+
+common common
+
+  build-depends: 
+      base
+        >= 4.12 && < 4.15
+    , deepseq
+        ^>= 1.4.4.0
+    , finite-typelits
+        ^>= 0.1.4.2
+    , generic-data
+        ^>= 0.7.0.0
+
+  default-language:
+      Haskell2010
+
+  ghc-options:
+      -O2
+      -Wall
+      -Wcompat
+      -fwarn-missing-local-signatures
+      -fwarn-incomplete-uni-patterns
+      -fwarn-missing-deriving-strategies
+  
+
+library
+
+  import:
+      common
+
+  hs-source-dirs:
+      src
+
+  exposed-modules:
+      Data.Act
+    , Data.Group
+    , Data.Group.Cyclic
+
+
+library acts-examples
+
+  import:
+      common
+
+  hs-source-dirs:
+      examples
+
+  exposed-modules:
+      Acts.Examples.MusicalIntervals
+
+  visibility:
+      public
+
+  build-depends:
+      acts
