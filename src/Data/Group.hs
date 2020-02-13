@@ -210,10 +210,9 @@ instance ( Group ( f1 p ), Group ( f2 p ) ) => Group ( (f1 :*: f2) p ) where
   gtimes n ( g1 :*: g2 ) = ( gtimes n g1 :*: gtimes n g2 )
 
 instance
-  ( Generic   g
-  , Semigroup g
-  , Monoid    ( Generic.Rep g () )
-  , GGroup    ( Generic.Rep g )
+  ( Generic g
+  , Monoid  ( Generic.Rep g () )
+  , GGroup  ( Generic.Rep g )
   )
   => Group ( Generically g ) where
   inverse  = Generically . Generic.to . ginverse  . Generic.from . unGenerically

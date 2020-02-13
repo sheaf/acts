@@ -1,4 +1,4 @@
-cabal-version:  3.0
+cabal-version:  2.4
 name:           acts
 version:        0.1.0.0
 synopsis:       Semigroup actions, groups, and torsors.
@@ -7,30 +7,40 @@ license:        BSD-3-Clause
 build-type:     Simple
 author:         Sam Derbyshire
 maintainer:     Sam Derbyshire
+homepage:       https://github.com/sheaf/acts
+bug-reports:    https://github.com/sheaf/acts/issues
+extra-source-files:
+    changelog.md
 extra-doc-files:
-  img/*.svg
+    img/*.svg
 description:
   Acts and torsors model types which can be transformed under the action of another type.
-
+  .
   A prototypical example is affine space, which has an action by translation:
   given any two points in affine space, there is a unique translation that brings one to the other.
-
+  .
   This can be useful in a library keeping track of time: on top of needing to keep track
   of units, one also needs to distinguish between absolute time (time stamps) and relative time
   (time differences).
   The operations one expects in this situation are:
-
+  .
   * Addition and subtraction of time differences: time differences form a (commutative) group.
   * Translation of an absolute time by a time difference: there is an action of relative time on absolute time.
   * Given two absolute times, one can obtain the time difference between them: absolute time is a torsor under relative time.
-
+  .
   This library provides a convenient framework which helps to avoid mixing up these two different notions.
-
-
-  A fully fleshed out example is available at "Acts.Examples.MusicalIntervals",
+  .
+  .
+  A fleshed out example is available at "Acts.Examples.MusicalIntervals",
   which showcases the use of actions and torsors in the context of musical intervals and harmony.
   It also demonstrates common usage patterns of this library, such as how to automatically derive instances.
+  .
+  See also the [project readme](https://github.com/sheaf/acts),
+  which includes a simple example with 2D affine space.
 
+source-repository head
+  type: git
+  location: git://github.com/sheaf/acts.git
 
 common common
 
@@ -42,7 +52,7 @@ common common
     , finite-typelits
         ^>= 0.1.4.2
     , generic-data
-        ^>= 0.7.0.0
+        >= 0.6.0.1 && < 0.7.0.0
 
   default-language:
       Haskell2010
@@ -54,7 +64,7 @@ common common
       -fwarn-missing-local-signatures
       -fwarn-incomplete-uni-patterns
       -fwarn-missing-deriving-strategies
-  
+
 
 library
 
@@ -80,9 +90,6 @@ library acts-examples
 
   exposed-modules:
       Acts.Examples.MusicalIntervals
-
-  visibility:
-      public
 
   build-depends:
       acts

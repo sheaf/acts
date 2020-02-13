@@ -63,7 +63,7 @@ import Data.Finite
 import Data.Act
   ( Act(..), Torsor(..) )
 import Data.Group
-  ( Group )
+  ( Group(..) )
 
 -----------------------------------------------------------------
 
