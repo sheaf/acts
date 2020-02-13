@@ -25,7 +25,16 @@ act ( x --> y ) x = y
 ```
 
 
-For instance, addition of points in the plane is not meaningful, but points can be translated by spatial vectors, and given any two points there is a unique translation taking the first point to the second point.
+# Examples
+
+* [Points and vectors](#affinespace)
+* [Time](#time)
+* [Musical intervals](#intervals)
+
+<a name="affinespace"></a>
+## Points and vectors
+
+Addition of points in the plane is not meaningful, but points can be translated by spatial vectors, and given any two points there is a unique translation taking the first point to the second point.
 
 ```haskell
 data Point2D a = Point2D !a !a
@@ -70,7 +79,7 @@ as well as reverse them:
 
 ```haskell
 > inverse v1
-Vector2D {tip = Point2D (-1.0) 0.0}
+Vector2D {tip = Point2D 0.0 (-1.0)}
 ```
 
 Two points form a vector:
@@ -125,20 +134,92 @@ act ( c <-- b ) . act ( b <-- a ) = act ( c <-- a )
 
 Note that in the case of translation these distinctions are irrelevant, as translations form a *commutative* group.
 
-# Examples
+<a name="time"></a>
+## Time
 
-[Acts.Examples.MusicalIntervals](examples/Acts/Examples/MusicalIntervals.hs) illustrates the application of this library to musical intervals.
-
-Musical note names are a torsor under the cyclic group of order 7, and this can be used to transpose notes by musical intervals in an enharmonically correct way:
+We can similarly distinguish absolute time (such as time obtained by querying the operating system) and time differences.
 
 ```haskell
-diminished7th :: [ Interval ]
-diminished7th = [ Interval 1 Natural, Interval 3 Flat, Interval 5 Flat, Interval 7 DoubleFlat ]
-
-> map ( `act` Note G Sharp 3 ) diminished7th
-[ "G#3", "B3", "D4", "F4" ]
-
-> Note F Natural 3 --> Note B Natural 3 :: Interval
-Interval 4 Sharp
-"augmented 4th up"
+newtype Seconds   = Seconds { getSeconds :: Double }
+  deriving stock Show
+  deriving ( Act TimeDelta, Torsor TimeDelta )
+    via TimeDelta
+newtype TimeDelta = TimeDelta { timeDeltaInSeconds :: Seconds }
+  deriving stock Show
+  deriving ( Semigroup, Monoid, Group )
+    via Sum Double
 ```
+
+The distinction is useful to prevent mixing up absolute times with time differences, so that one doesn't accidentally add two absolute times together:
+
+```haskell
+> Seconds 3 <> Seconds 4
+```
+```
+* No instance for (Semigroup Seconds) arising from a use of `<>`
+```
+
+This might seem trivial in isolation, but in the middle of a complex application it can be very helpful to have the compiler enforce this distinction,
+so that one doesn't have to e.g. remember whether the time value one has elsewhere stored in an `IORef` is absolute or relative.
+
+Having to manually unwrap the `TimeDelta` newtype at use-sites would prove to be quite inconvenient;
+instead the interface this library provides comes in handy:
+
+```haskell
+> act ( TimeDelta ( Seconds 3 ) ) ( Seconds 4 )
+Seconds {getSeconds = 7.0}
+```
+
+```haskell
+> Seconds 3 --> Seconds 4 :: TimeDelta
+TimeDelta {timeDeltaInSeconds = Seconds {getSeconds = 1.0}}
+```
+
+This can be used for instance to tick down a timer after some time has elapsed:
+
+```haskell
+countdownTimer :: Seconds -> Seconds -> TimeDelta -> TimeDelta
+countdownTimer startTime endTime timeRemaining =
+  act ( endTime --> startTime ) timeRemaining
+```
+
+<a name="intervals"></a>
+## Musical intervals
+
+[Acts.Examples.MusicalIntervals](https://hackage.haskell.org/package/acts/docs/Acts-Examples-MusicalIntervals.html) demonstrates the application of this library to musical intervals.
+
+In summary:
+
+  * Musical note names are a torsor under the cyclic group of order 7
+
+  ```haskell
+  data NoteName = C | D | E | F | G | A | B
+    deriving ( Act ( Group.Cyclic 7 ), Torsor ( Group.Cyclic 7 ) )
+      via CyclicEnum NoteName
+  ```
+
+  * Musical notes are a torsor under musical intervals, meaning that:
+
+    - we can transpose notes by musical intervals
+
+    ```haskell
+    diminished7th :: [ Interval ]
+    diminished7th = [ Interval 1 Natural, Interval 3 Flat, Interval 5 Flat, Interval 7 DoubleFlat ]
+    
+    > map ( `act` Note G Sharp 3 ) diminished7th
+    [ "G#3", "B3", "D4", "F4" ]
+    ```
+
+    - we can compute intervals between notes
+
+    ```haskell
+    > Note F Natural 3 --> Note B Natural 3 :: Interval
+    Interval 4 Sharp
+    "augmented 4th up"
+    
+    > Note E Flat 4 --> Note C Flat 6 :: Interval
+    Interval 13 Flat
+    "minor 13th up"
+    ```
+
+<br>
