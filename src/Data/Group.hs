@@ -104,7 +104,7 @@ import Generic.Data
 -- * @ inverse (g <> h) = inverse h <> inverse g @
 class Monoid g => Group g where
   {-# MINIMAL inverse | gtimes #-}
-  -- | Group inversion anti-homomorphism.
+  -- | Group inversion anti-automorphism.
   inverse :: g -> g
   inverse = gtimes ( (-1) :: Int )
 
@@ -115,11 +115,11 @@ class Monoid g => Group g where
     GT -> stimes n
     LT -> stimes ( negate n ) . inverse
 
--- | The inverse anti-automorphism of a group lifts to a isomorphism with the opposite group.
+-- | The inverse anti-automorphism of a group lifts to an isomorphism with the opposite group.
 anti :: Group g => g -> Dual g
 anti g = Dual ( inverse g )
 
--- | Reflexive property 'Dual' (should be included in base, maybe under another name).
+-- | Reflexive property of 'Dual'.
 reflexive :: Dual ( Dual a ) -> a
 reflexive = coerce
 

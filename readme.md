@@ -2,7 +2,18 @@
   <img src="img/coerce.svg" alt="Defining a torsor by transporting a group operation">
 </p>
 
+
 # Acts <a href="https://hackage.haskell.org/package/acts" alt="Hackage"><img src="https://img.shields.io/hackage/v/acts.svg" /></a>
+
+* [Introduction](#intro)
+* [Examples](#examples)
+  - [Points and vectors](#affinespace)
+  - [Time](#time)
+  - [Musical intervals](#intervals)
+* [Comparison with existing libraries](#comparison)
+
+<a name="intro"></a>
+# Introduction
 
 **acts** is a Haskell library for semigroup actions, groups and torsors.
 
@@ -25,11 +36,9 @@ act ( x --> y ) x = y
 ```
 
 
-# Examples
 
-* [Points and vectors](#affinespace)
-* [Time](#time)
-* [Musical intervals](#intervals)
+<a name="examples"></a>
+# Examples
 
 <a name="affinespace"></a>
 ## Points and vectors
@@ -226,5 +235,36 @@ In summary:
     Interval 13 Flat
     "minor 13th up"
     ```
+
+<a name="comparison"></a>
+# Comparison with existing libraries
+
+The main purpose of this library is to provide convenient functionality for `torsors`. Other packages such as
+[torsor](https://hackage.haskell.org/package/torsor), [vector-space](https://hackage.haskell.org/package/vector-space), [simple-affine-space](https://hackage.haskell.org/package/simple-affine-space) and [Linear.Affine](https://hackage.haskell.org/package/linear/docs/Linear-Affine.html) concentrate on affine spaces (as reflected in their syntax), and as a result don't naturally cover the use case of finite actions (such as the action of a cyclic group on musical notes given above).    
+
+The other design choice of this library is to focus on using newtypes and let users choose instances with `DerivingVia`,
+trying to re-use newtypes from the `base` library when possible.     
+This works around some difficulties with overlapping instances (although it is hardly a robust or comprehensive solution).    
+To compare with other libraries that define semigroup actions (but not torsors):
+
+  * [semigroup-actions](https://hackage.haskell.org/package/semigroups-actions) uses a similar approach,
+  but the use of a newtype for the action of a semigroup on itself precludes many useful usages of `DerivingVia`
+  (such as the the [affine space](#affinespace) and [time](#time) examples given above).
+  * [monoid-extras](https://hackage.haskell.org/package/monoid-extras) also defines newtypes for instances,
+  but these aren't easily usable with `DerivingVia` as they focus on the first (instead of last) type parameter.
+
+This library is also careful to distinguish left and right actions, with the `Dual` newtype:
+
+```haskell
+instance ( Semigroup s, Act s a, Act t b ) => Act ( Dual s, t ) ( a -> b ) where
+  act ( Dual s, t ) p = act t . p . act s
+```
+
+This captures the fact that, if `a` has a left action by `s`, and `b` a left action by `t`,
+then `a -> b` has a *right* action by `s` and a left action by `t`.
+
+Finally, this library defines its own `Group` class instead of re-using the one from [groups](https://hackage.haskell.org/package/groups),
+in order to provide extra instances and functionality for generic deriving. I am hoping to contribute these features to that package
+to help remove library duplication.
 
 <br>
