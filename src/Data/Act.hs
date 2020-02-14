@@ -2,13 +2,11 @@
     DeriveGeneric
   , DeriveDataTypeable
   , DerivingVia
-  , FlexibleContexts
   , FlexibleInstances
   , GeneralizedNewtypeDeriving
   , MultiParamTypeClasses
   , ScopedTypeVariables
   , StandaloneDeriving
-  , TypeApplications
   , TypeFamilies
   , UndecidableInstances
 #-}
@@ -45,6 +43,7 @@ module Data.Act
   , transportAction
   , Trivial(..)
   , Torsor(..)
+  , anti
   , intertwiner
   , Finitely(..)
   )
@@ -81,9 +80,9 @@ import Data.Finitary
 import Data.Finite
   ( Finite )
 
--- acts
+-- groups
 import Data.Group
-  ( Group(..), anti )
+  ( Group(..) )
 
 -----------------------------------------------------------------
 
@@ -235,9 +234,16 @@ class ( Group g, Act g x ) => Torsor g x where
 infix 7 -->
 infix 7 <--
 
+-- | A group's inversion anti-automorphism corresponds to an isomorphism to the opposite group.
+--
+-- The inversion allows us to obtain a left action from a right action (of the same group);
+-- the equivalent operation is not possible for general semigroups.
+anti :: Group g => g -> Dual g
+anti g = Dual ( invert g )
+
 -- | Any group is a torsor under its own natural left action.
 instance Group g => Torsor g g where
-  h <-- g = h <> inverse g
+  h <-- g = h <> invert g
 
 instance Num a => Torsor ( Sum a ) a where
   (<--) = coerce ( (<--) :: Sum a -> Sum a -> Sum a )

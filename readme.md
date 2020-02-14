@@ -15,7 +15,7 @@
 <a name="intro"></a>
 # Introduction
 
-**acts** is a Haskell library for semigroup actions, groups and torsors.
+**acts** is a Haskell library for semigroup actions and torsors.
 
 An *act* denotes the ability to apply transformations in a compositional way:
 
@@ -36,7 +36,6 @@ act ( x --> y ) x = y
 ```
 
 
-
 <a name="examples"></a>
 # Examples
 
@@ -53,8 +52,10 @@ data Point2D a = Point2D !a !a
 newtype Vector2D a = Vector2D { tip :: Point2D a }
   deriving stock Show
   deriving ( Semigroup, Monoid, Group )
-    via Generically ( Point2D ( Sum a ) )
+    via GenericProduct ( Point2D ( Sum a ) )
 ```
+
+Here we use `DerivingVia` and generics (with [generic-data](https://hackage.haskell.org/package/generic-data) and [groups-generic](https://hackage.haskell.org/package/groups-generic)) to obtain the relevant instances.
 
 ```haskell
 p1, p2, p3 :: Point2D Double
@@ -87,7 +88,7 @@ Vector2D {tip = Point2D 1.0 2.0}
 as well as reverse them:
 
 ```haskell
-> inverse v1
+> invert v1
 Vector2D {tip = Point2D 0.0 (-1.0)}
 ```
 
@@ -113,7 +114,7 @@ Point2D 1.0 0.0
 ```
 
 ```haskell
-> act ( inverse v12 ) p2
+> act ( invert v12 ) p2
 Point2D 0.5 2.5
 ```
 
@@ -203,14 +204,17 @@ In summary:
 
   ```haskell
   -- Cyclic group of order 7.
-  type C7 = Sum ( Finite 7 )
+  type C7 = Sum ( Finite 7 ) -- 'Finite' from the 'finite-typelits' package
 
   data NoteName = C | D | E | F | G | A | B
-    deriving stock    ( Show, Generic )
+    deriving stock    ( Eq, Show, Generic )
     deriving anyclass Finitary
     deriving ( Act C7, Torsor C7 )
       via Finitely NoteName
   ```
+
+  In this case we use the [finitary](https://hackage.haskell.org/package/finitary) package to derive the action,
+  using the newtype `Finitely`.
 
   * Musical notes are a torsor under musical intervals, meaning that:
 
@@ -239,7 +243,7 @@ In summary:
 <a name="comparison"></a>
 # Comparison with existing libraries
 
-The main purpose of this library is to provide convenient functionality for `torsors`. Other packages such as
+The main purpose of this library is to provide convenient functionality for *torsors*. Other packages such as
 [torsor](https://hackage.haskell.org/package/torsor), [vector-space](https://hackage.haskell.org/package/vector-space), [simple-affine-space](https://hackage.haskell.org/package/simple-affine-space) and [Linear.Affine](https://hackage.haskell.org/package/linear/docs/Linear-Affine.html) concentrate on affine spaces (as reflected in their syntax), and as a result don't naturally cover the use case of finite actions (such as the action of a cyclic group on musical notes given above).    
 
 The other design choice of this library is to focus on using newtypes and let users choose instances with `DerivingVia`,
@@ -249,7 +253,7 @@ To compare with other libraries that define semigroup actions (but not torsors):
 
   * [semigroup-actions](https://hackage.haskell.org/package/semigroups-actions) uses a similar approach,
   but the use of a newtype for the action of a semigroup on itself precludes many useful usages of `DerivingVia`
-  (such as the the [affine space](#affinespace) and [time](#time) examples given above).
+  (such as the [affine space](#affinespace) and [time](#time) examples given above).
   * [monoid-extras](https://hackage.haskell.org/package/monoid-extras) also defines newtypes for instances,
   but these aren't easily usable with `DerivingVia` as they focus on the first (instead of last) type parameter.
 
@@ -263,8 +267,5 @@ instance ( Semigroup s, Act s a, Act t b ) => Act ( Dual s, t ) ( a -> b ) where
 This captures the fact that, if `a` has a left action by `s`, and `b` a left action by `t`,
 then `a -> b` has a *right* action by `s` and a left action by `t`.
 
-Finally, this library defines its own `Group` class instead of re-using the one from [groups](https://hackage.haskell.org/package/groups),
-in order to provide extra instances and functionality for generic deriving. I am hoping to contribute these features to that package
-to help remove library duplication.
 
 <br>

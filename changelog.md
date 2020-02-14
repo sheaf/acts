@@ -1,5 +1,10 @@
 # Changelog for package `acts`
 
+## 0.3.0.0 ( February 16, 2020 )
+
+* Switch to using the `groups` package for the definition of the `Group` typeclass,
+splitting off the generic instances to the `groups-generic` package.
+
 ## 0.2.0.0 ( February 14, 2020 )
 
 * Remove definition of cyclic groups.

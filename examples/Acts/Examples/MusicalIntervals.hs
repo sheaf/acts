@@ -46,11 +46,13 @@ import Data.Finitary
 import Data.Finite
   ( Finite )
 
+-- groups
+import Data.Group
+  ( Group(..) )
+
 -- acts
 import Data.Act
   ( Act(..), Torsor(..), Finitely(..) )
-import Data.Group
-  ( Group(..) )
 
 -----------------------------------------------------------------
 -- * Musical notes
@@ -129,7 +131,7 @@ data Note = Note { name :: NoteName, alteration :: Alteration, octave :: Int }
 -- > > Steps ( Sum (-2) ) Natural
 -- > minor 3rd down
 --
--- > > inverse ( Steps ( Sum 2 ) Natural )
+-- > > invert ( Steps ( Sum 2 ) Natural )
 -- > Steps ( Sum (-2) ) Flat
 -- > major 3rd down
 
@@ -162,7 +164,7 @@ instance Semigroup Interval where
 instance Monoid Interval where
   mempty = Steps mempty mempty
 instance Group Interval where
-  inverse = twist . inverse . straighten
+  invert = twist . invert . straighten
 
 -- | Intervallically correct action of intervals on notes.
 --
@@ -303,7 +305,7 @@ instance Show Interval where
       then ivalName
       else quality ival <> " " <> ivalName
     | i < 0
-    = quality ( inverse ival ) <> " " <> showOrdinal (-i+1) <> " down"
+    = quality ( invert ival ) <> " " <> showOrdinal (-i+1) <> " down"
     | otherwise
     = quality ival <> " " <> showOrdinal (i+1) <> " up"
 

@@ -1,6 +1,6 @@
 cabal-version:  2.4
 name:           acts
-version:        0.2.0.0
+version:        0.3.0.0
 synopsis:       Semigroup actions, groups, and torsors.
 category:       Algebra, Math
 license:        BSD-3-Clause
@@ -47,14 +47,12 @@ common common
   build-depends: 
       base
         >= 4.12 && < 4.15
-    , deepseq
-        ^>= 1.4.4.0
     , finitary
         ^>= 1.2.0.0
     , finite-typelits
         ^>= 0.1.4.2
-    , generic-data
-        >= 0.6.0.1 && < 0.7.0.0
+    , groups
+        ^>= 0.4.0.0
 
   default-language:
       Haskell2010
@@ -78,7 +76,10 @@ library
 
   exposed-modules:
       Data.Act
-    , Data.Group
+
+  build-depends:
+      deepseq
+        ^>= 1.4.4.0
 
 
 library acts-examples
