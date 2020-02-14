@@ -51,7 +51,7 @@ To automatically derive 'Group' instances, you can:
 
 
 module Data.Group
-  ( Group(..)
+  ( Group(..), anti, reflexive
   , Isom(..)
   )
   where
@@ -59,6 +59,8 @@ module Data.Group
 -- base
 import Control.Monad.ST
   ( ST )
+import Data.Coerce
+  ( coerce )
 import Data.Data
   ( Data )
 import Data.Functor.Const
@@ -112,6 +114,14 @@ class Monoid g => Group g where
     EQ -> const mempty
     GT -> stimes n
     LT -> stimes ( negate n ) . inverse
+
+-- | The inverse anti-automorphism of a group lifts to a isomorphism with the opposite group.
+anti :: Group g => g -> Dual g
+anti g = Dual ( inverse g )
+
+-- | Reflexive property 'Dual' (should be included in base, maybe under another name).
+reflexive :: Dual ( Dual a ) -> a
+reflexive = coerce
 
 -----------------------------------------------------------------------
 -- Instances.

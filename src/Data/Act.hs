@@ -8,6 +8,8 @@
   , MultiParamTypeClasses
   , ScopedTypeVariables
   , StandaloneDeriving
+  , TypeApplications
+  , TypeFamilies
   , UndecidableInstances
 #-}
 
@@ -44,6 +46,7 @@ module Data.Act
   , Trivial(..)
   , Torsor(..)
   , intertwiner
+  , Finitely(..)
   )
   where
 
@@ -62,7 +65,7 @@ import Data.Monoid
   , Ap(..), Endo(..)
   )
 import Data.Semigroup
-  ( Max(..), Min(..), Dual(..) )
+  ( Dual(..) )
 import GHC.Generics
   ( Generic, Generic1 )
 
@@ -70,9 +73,17 @@ import GHC.Generics
 import Control.DeepSeq
   ( NFData )
 
+-- finitary
+import Data.Finitary
+  ( Finitary(..) )
+
+-- finite-typelits
+import Data.Finite
+  ( Finite )
+
 -- acts
 import Data.Group
-  ( Group(..) )
+  ( Group(..), anti )
 
 -----------------------------------------------------------------
 
@@ -118,10 +129,10 @@ instance Semigroup s => Act s ( Trivial a ) where
 
 deriving via Any instance Act Any Bool
 deriving via All instance Act All Bool
-deriving via ( Sum     a ) instance Num a => Act ( Sum     a ) a
-deriving via ( Product a ) instance Num a => Act ( Product a ) a
-deriving via ( Max     a ) instance Ord a => Act ( Max     a ) a
-deriving via ( Min     a ) instance Ord a => Act ( Min     a ) a
+instance Num a => Act ( Sum     a ) a where
+  act s = coerce ( act s :: Sum a -> Sum a )
+instance Num a => Act ( Product a ) a where
+  act s = coerce ( act s :: Product a -> Product a )
 
 instance {-# OVERLAPPING #-} Act () x where
   act _ = id
@@ -148,21 +159,54 @@ deriving newtype instance Act s a => Act s ( Const a b )
 instance ( Act s x, Functor f ) => Act s ( Ap f x ) where
   act s = coerce ( fmap ( act s ) :: f x -> f x )
 
--- | Acting through the contravariant function arrow functor.
+-- | Acting through the contravariant function arrow functor: right action.
+--
+-- If acting by a group, use `anti :: Group g => g -> Dual g` to act by the original group
+-- instead of the opposite group.
 instance ( Semigroup s, Act s a ) => Act ( Dual s ) ( Op b a ) where
   act ( Dual s ) = coerce ( ( . act s ) :: ( a -> b ) -> ( a -> b ) )
 
 -- | Acting through a function arrow: both covariant and contravariant actions.
+--
+-- If acting by a group, use `anti :: Group g => g -> Dual g` to act by the original group
+-- instead of the opposite group.
 instance ( Semigroup s, Act s a, Act t b ) => Act ( Dual s, t ) ( a -> b ) where
   act ( Dual s, t ) p = act t . p . act s
 
--- | Action of an opposite group using inverses.
-instance {-# OVERLAPPABLE #-} ( Act g x, Group g ) => Act ( Dual g ) x where
-  act ( Dual g ) = act ( inverse g )
-
 -- | Action of a group on endomorphisms.
 instance ( Group g, Act g a ) => Act g ( Endo a ) where
-  act g = coerce ( act ( Dual g, g ) :: ( a -> a ) -> ( a -> a ) )
+  act g = coerce ( act ( anti g, g ) :: ( a -> a ) -> ( a -> a ) )
+
+-- | Newtype for the action on a type through its 'Finitary' instance.
+--
+-- > data ABCD = A | B | C | D
+-- >   deriving stock    ( Eq, Generic )
+-- >   deriving anyclass Finitary
+-- >   deriving ( Act ( Sum ( Finite 4 ) ), Torsor ( Sum ( Finite 4 ) ) )
+-- >     via Finitely ABCD
+--
+-- Sizes are checked statically. For instance if we had instead written:
+--
+-- >   deriving ( Act ( Sum ( Finite 3 ) ), Torsor ( Sum ( Finite 3 ) ) )
+-- >     via Finitely ABCD
+--
+-- we would have gotten the error messages:
+--
+-- > * No instance for (Act (Sum (Finite 3)) (Finite 4))
+-- > * No instance for (Torsor (Sum (Finite 3)) (Finite 4))
+--
+newtype Finitely a = Finitely { getFinitely :: a }
+  deriving stock   ( Show, Read, Data, Generic, Generic1 )
+  deriving newtype ( Eq, Ord, NFData )
+
+-- | Act on a type through its 'Finitary' instance.
+instance ( Semigroup s, Act    s ( Finite n ), Finitary a, n ~ Cardinality a )
+        => Act    s ( Finitely a ) where
+  act s = Finitely . fromFinite . act s . toFinite . getFinitely
+-- | Torsor for a type using its 'Finitary' instance.
+instance ( Group     g, Torsor g ( Finite n ), Finitary a, n ~ Cardinality a )
+      => Torsor g ( Finitely a ) where
+  Finitely x --> Finitely y = toFinite x --> toFinite y
 
 -----------------------------------------------------------------
 
@@ -195,7 +239,8 @@ infix 7 <--
 instance Group g => Torsor g g where
   h <-- g = h <> inverse g
 
-deriving via ( Sum a ) instance Num a => Torsor ( Sum a ) a
+instance Num a => Torsor ( Sum a ) a where
+  (<--) = coerce ( (<--) :: Sum a -> Sum a -> Sum a )
 
 -- | Given
 -- 

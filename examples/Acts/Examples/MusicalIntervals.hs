@@ -1,5 +1,6 @@
 {-# LANGUAGE
     DataKinds
+  , DeriveAnyClass
   , DeriveGeneric
   , DerivingVia
   , MultiParamTypeClasses
@@ -34,11 +35,22 @@ module Acts.Examples.MusicalIntervals where
 -- base
 import Data.Monoid
   ( Sum(..) )
+import GHC.Generics
+  ( Generic )
+
+-- finitary
+import Data.Finitary
+  ( Finitary )
+
+-- finite-typelits
+import Data.Finite
+  ( Finite )
 
 -- acts
 import Data.Act
+  ( Act(..), Torsor(..), Finitely(..) )
 import Data.Group
-import Data.Group.Cyclic
+  ( Group(..) )
 
 -----------------------------------------------------------------
 -- * Musical notes
@@ -46,17 +58,21 @@ import Data.Group.Cyclic
 -- $notenames
 -- We begin by defining note names, which are acted upon by the cyclic group of order 7.
 
+-- | Cyclic group of order 7.
+type C7 = Sum ( Finite 7 )
+
 -- | Musical note names.
 --
 -- The enumeration starts with @C@ to conform with scientific pitch notation.
 data NoteName = C | D | E | F | G | A | B
-  deriving stock ( Eq, Ord, Show, Enum, Bounded )
-  deriving ( Act ( C 7 ), Torsor ( C 7 ) )
-    via CyclicEnum NoteName
+  deriving stock    ( Eq, Ord, Show, Enum, Bounded, Generic )
+  deriving anyclass Finitary
+  deriving ( Act C7, Torsor C7 )
+    via Finitely NoteName
 
 -- $deriving1
--- In this case we used @DerivingVia@ to derive the action of @C 7@,
--- using the 'CyclicEnum' newtype created for this exact purpose.
+-- In this case we used @DerivingVia@ to derive the action of @C7@
+-- through the 'Finitary' instance of 'NoteName' by using the 'Finitely' newtype.
 
 -- | Alterations, i.e. sharps and flats.
 --
@@ -153,8 +169,9 @@ instance Group Interval where
 --  * minor third up from @C@: @Eb@
 --  * minor third up from @A@: @C@.
 instance Act Interval Note where
-  act ( Steps ( Sum steps ) a ) ( Note C a' o ) = Note ( act ( Cyclic @7 r ) C ) ( a <> a' ) ( q + o )
+  act ( Steps ( Sum steps ) a ) ( Note C a' o ) = Note ( act ( fromIntegral r :: C7 ) C ) ( a <> a' ) ( q + o )
     where
+      q, r :: Int
       ( q, r ) = steps `divMod` 7
   act ival note = act ( ival <> ( Note C Natural 0 --> note ) ) ( Note C Natural 0 )
 

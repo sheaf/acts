@@ -193,9 +193,14 @@ In summary:
   * Musical note names are a torsor under the cyclic group of order 7
 
   ```haskell
+  -- Cyclic group of order 7.
+  type C7 = Sum ( Finite 7 )
+
   data NoteName = C | D | E | F | G | A | B
-    deriving ( Act ( Group.Cyclic 7 ), Torsor ( Group.Cyclic 7 ) )
-      via CyclicEnum NoteName
+    deriving stock    ( Show, Generic )
+    deriving anyclass Finitary
+    deriving ( Act C7, Torsor C7 )
+      via Finitely NoteName
   ```
 
   * Musical notes are a torsor under musical intervals, meaning that:
