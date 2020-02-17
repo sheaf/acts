@@ -1,7 +1,7 @@
 cabal-version:  2.4
 name:           acts
 version:        0.3.0.0
-synopsis:       Semigroup actions, groups, and torsors.
+synopsis:       Semigroup actions and torsors.
 category:       Algebra, Math
 license:        BSD-3-Clause
 build-type:     Simple
