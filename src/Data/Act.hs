@@ -1,5 +1,6 @@
 {-# LANGUAGE
-    DeriveGeneric
+    CPP
+  , DeriveGeneric
   , DeriveDataTypeable
   , DerivingVia
   , FlexibleInstances
@@ -72,6 +73,7 @@ import GHC.Generics
 import Control.DeepSeq
   ( NFData )
 
+#ifdef FIN
 -- finitary
 import Data.Finitary
   ( Finitary(..) )
@@ -79,6 +81,7 @@ import Data.Finitary
 -- finite-typelits
 import Data.Finite
   ( Finite )
+#endif
 
 -- groups
 import Data.Group
@@ -198,6 +201,7 @@ newtype Finitely a = Finitely { getFinitely :: a }
   deriving stock   ( Show, Read, Data, Generic, Generic1 )
   deriving newtype ( Eq, Ord, NFData )
 
+#ifdef FIN
 -- | Act on a type through its 'Finitary' instance.
 instance ( Semigroup s, Act    s ( Finite n ), Finitary a, n ~ Cardinality a )
         => Act    s ( Finitely a ) where
@@ -206,6 +210,7 @@ instance ( Semigroup s, Act    s ( Finite n ), Finitary a, n ~ Cardinality a )
 instance ( Group     g, Torsor g ( Finite n ), Finitary a, n ~ Cardinality a )
       => Torsor g ( Finitely a ) where
   Finitely x --> Finitely y = toFinite x --> toFinite y
+#endif
 
 -----------------------------------------------------------------
 

@@ -1,5 +1,10 @@
 # Changelog for package `acts`
 
+## 0.3.1.0 ( February 23, 2020 )
+
+* Add a cabal flag to remove dependencies on `finite-typelits` and `finitary`,
+at the cost of the instances providing actions on finite types.
+
 ## 0.3.0.0 ( February 16, 2020 )
 
 * Switch to using the `groups` package for the definition of the `Group` typeclass,
