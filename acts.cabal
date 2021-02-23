@@ -48,7 +48,7 @@ flag finitary
     .
     Disable to remove dependencies on `finite-typelits` and `finitary`.
   default: True
-  manual: False
+  manual: True
 
 common common
 
