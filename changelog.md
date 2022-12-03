@@ -1,5 +1,9 @@
 # Changelog for package `acts`
 
+## 0.3.1.1 ( December 3, 2022 )
+
+* Bump upper bounds on `base`, `finitary` and `groups`.
+
 ## 0.3.1.0 ( February 23, 2020 )
 
 * Add a cabal flag to remove dependencies on `finite-typelits` and `finitary`,

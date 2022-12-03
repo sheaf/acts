@@ -1,6 +1,6 @@
 cabal-version:  2.4
 name:           acts
-version:        0.3.1.0
+version:        0.3.1.1
 synopsis:       Semigroup actions and torsors.
 category:       Algebra, Math
 license:        BSD-3-Clause
@@ -52,18 +52,18 @@ flag finitary
 
 common common
 
-  build-depends: 
+  build-depends:
       base
-        >= 4.12 && < 4.17
+        >= 4.12 && < 4.18
     , groups
-        ^>= 0.4.0.0
+        >= 0.4.0.0 && < 0.6
 
   if flag(finitary)
     cpp-options:
         -DFIN
     build-depends:
         finitary
-          >= 1.2.0.0 && < 2.1
+          >= 1.2.0.0 && < 2.2
       , finite-typelits
           ^>= 0.1.4.2
 
