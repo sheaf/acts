@@ -1,5 +1,10 @@
 # Changelog for package `acts`
 
+## 0.3.1.2 ( February 03, 2025 )
+
+* Bump upper bounds on `base`, `deepseq`, `finitary`, and `finite-typelits`
+  (thanks to @viercc).
+
 ## 0.3.1.1 ( December 3, 2022 )
 
 * Bump upper bounds on `base`, `finitary` and `groups`.
