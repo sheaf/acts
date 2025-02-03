@@ -4,11 +4,13 @@
   , DeriveDataTypeable
   , DerivingVia
   , FlexibleInstances
+  , FlexibleContexts
   , GeneralizedNewtypeDeriving
   , MultiParamTypeClasses
   , ScopedTypeVariables
   , StandaloneDeriving
   , TypeFamilies
+  , TypeOperators
   , UndecidableInstances
 #-}
 
