@@ -54,7 +54,7 @@ common common
 
   build-depends:
       base
-        >= 4.12    && < 4.21
+        >= 4.12    && < 5.0
     , groups
         >= 0.4.0.0 && < 0.6
 
